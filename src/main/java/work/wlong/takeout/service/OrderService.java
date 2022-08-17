@@ -1,13 +1,19 @@
-package com.itheima.reggie.service;
+package work.wlong.takeout.service;
 
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.itheima.reggie.entity.Orders;
+import org.springframework.transaction.annotation.Transactional;
+import work.wlong.takeout.dto.OrdersDto;
+import work.wlong.takeout.entity.Orders;
 
 public interface OrderService extends IService<Orders> {
 
-    /**
-     * 用户下单
-     * @param orders
-     */
-    public void submit(Orders orders);
+
+
+    void submit(Orders orders);
+
+    Page<OrdersDto> pageDto(int page, int pageSize);
 }
+
+

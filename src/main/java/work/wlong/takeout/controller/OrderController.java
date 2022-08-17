@@ -1,2 +1,123 @@
-package work.wlong.takeout.controller;public class OrderController {
+package work.wlong.takeout.controller;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.*;
+import work.wlong.takeout.common.R;
+import work.wlong.takeout.dto.OrdersDto;
+import work.wlong.takeout.entity.*;
+import work.wlong.takeout.service.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 订单
+ */
+@Slf4j
+@RestController
+@RequestMapping("/order")
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private OrderDetailService orderDetailService;
+
+
+    /**
+     * 用户下单
+     * @param orders
+     * @return
+     */
+    @PostMapping("/submit")
+    public R<String> submit(@RequestBody Orders orders){
+        log.info("订单数据：{}",orders);
+        orderService.submit(orders);
+        return R.success("下单成功");
+    }
+
+    @GetMapping("/userPage")
+    public R<Page<OrdersDto>> pageR(int page,int pageSize){
+        Page<OrdersDto> pageDto = orderService.pageDto(page,pageSize);
+        return R.success(pageDto);
+    }
+
+
+    /**
+     * 再买一单
+     * @param id
+     * @return
+     */
+    @PostMapping("/again")
+    public R<String> again(Long id){
+        log.info("id:{}",id);
+        orderDetailService.getById(id);
+        return R.success("下单成功");
+    }
+
+
+    /**
+     * 分页查询
+     * @param page
+     * @param pageSize
+     * @param number
+     * @return
+     */
+    @GetMapping("/page")
+    public R<Page> page(int page,int pageSize,String number){
+        //分页构造器对象
+        Page<Orders> ordersPage=new Page<>(page,pageSize);
+        Page<OrdersDto> ordersDtoPage=new Page<>();
+        //按订单号进行查询
+        LambdaQueryWrapper<Orders> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(number!=null,Orders::getNumber,number);
+        orderService.page(ordersPage, queryWrapper);
+        //对象拷贝
+        BeanUtils.copyProperties(ordersPage,ordersDtoPage,"records");
+        List<Orders> records = ordersPage.getRecords();
+        List<OrdersDto> list=records.stream().map(item->{
+            OrdersDto ordersDto=new OrdersDto();
+            //对象拷贝
+            BeanUtils.copyProperties(item,ordersDto);
+            //用户Id
+            Long userId = item.getUserId();
+            //根据用户Id查询用户
+            User user = userService.getById(userId);
+            if(user!=null){
+                //用户名称
+                String name = user.getName();
+                ordersDto.setUserName(name);
+            }
+            return ordersDto;
+        }).collect(Collectors.toList());
+        ordersDtoPage.setRecords(list);
+        return R.success(ordersDtoPage);
+    }
+
+    /**
+     * 更新状态
+     * @param orders
+     * @return
+     */
+    @PutMapping
+    public R<String> update(@RequestBody Orders orders){
+        LambdaUpdateWrapper<Orders> updateWrapper=new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Orders::getNumber,orders.getId());
+        updateWrapper.eq(Orders::getStatus,orders.getStatus()-1).set(Orders::getStatus,orders.getStatus());
+        orderService.update(updateWrapper);
+        return R.success("修改成功");
+    }
 }

@@ -1,2 +1,10 @@
-package work.wlong.takeout.common;public class CustomException {
+package work.wlong.takeout.common;
+
+/**
+ * 自定义业务异常类
+ */
+public class CustomException extends RuntimeException {
+    public CustomException(String message){
+        super(message);
+    }
 }

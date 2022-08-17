@@ -1,4 +1,4 @@
-package com.itheima.reggie.entity;
+package work.wlong.takeout.entity;
 
 import lombok.Data;
 import java.io.Serializable;

@@ -1,7 +1,8 @@
-package com.itheima.reggie.service;
+package work.wlong.takeout.service;
+
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.itheima.reggie.entity.Employee;
+import work.wlong.takeout.entity.Employee;
 
 public interface EmployeeService extends IService<Employee> {
 }

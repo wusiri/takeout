@@ -1,4 +1,5 @@
-package com.itheima.reggie.utils;
+package work.wlong.takeout.utils;
+
 
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;

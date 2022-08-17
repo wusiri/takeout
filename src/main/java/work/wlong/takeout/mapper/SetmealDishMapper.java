@@ -1,2 +1,9 @@
-package work.wlong.takeout.mapper;public class SetmealDishMapper {
+package work.wlong.takeout.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import work.wlong.takeout.entity.SetmealDish;
+
+@Mapper
+public interface SetmealDishMapper extends BaseMapper<SetmealDish> {
 }

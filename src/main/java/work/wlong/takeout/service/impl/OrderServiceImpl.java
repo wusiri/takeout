@@ -1,17 +1,21 @@
-package com.itheima.reggie.service.impl;
+package work.wlong.takeout.service.impl;
+
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.itheima.reggie.common.BaseContext;
-import com.itheima.reggie.common.CustomException;
-import com.itheima.reggie.entity.*;
-import com.itheima.reggie.mapper.OrderMapper;
-import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import work.wlong.takeout.common.BaseContext;
+import work.wlong.takeout.common.CustomException;
+import work.wlong.takeout.dto.OrdersDto;
+import work.wlong.takeout.entity.*;
+import work.wlong.takeout.mapper.OrderMapper;
+import work.wlong.takeout.service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +26,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implements OrderService {
-
     @Autowired
     private ShoppingCartService shoppingCartService;
 
@@ -39,6 +42,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
      * 用户下单
      * @param orders
      */
+    @Override
     @Transactional
     public void submit(Orders orders) {
         //获得当前用户id
@@ -105,4 +109,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         //清空购物车数据
         shoppingCartService.remove(wrapper);
     }
+
+
+    /**
+     * 分页查询订单信息和订单详细信息
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @Override
+    @Transactional
+    public Page<OrdersDto> pageDto(int page, int pageSize) {
+        Page<Orders> ordersPage = new Page<>(page, pageSize);
+        Page<OrdersDto> ordersDtoPage = new Page<>(page, pageSize);
+        LambdaQueryWrapper<Orders> ordersQueryWrapper = new LambdaQueryWrapper<>();
+        ordersQueryWrapper.eq(Orders::getUserId,BaseContext.getCurrentId())
+                .orderByDesc(Orders::getCheckoutTime);
+        this.page(ordersPage,ordersQueryWrapper);
+        BeanUtils.copyProperties(ordersPage,ordersDtoPage,"records");
+        List<Orders> records = ordersPage.getRecords();
+        List<OrdersDto> dtoList = records.stream().map((item)->{
+            OrdersDto ordersDto = new OrdersDto();
+            BeanUtils.copyProperties(item,ordersDto);
+            Long ordersId = item.getId();
+            LambdaQueryWrapper<OrderDetail> orderDetailQueryWrapper = new LambdaQueryWrapper<>();
+            orderDetailQueryWrapper.eq(OrderDetail::getOrderId,ordersId);
+            List<OrderDetail> list = orderDetailService.list(orderDetailQueryWrapper);
+            ordersDto.setOrderDetails(list);
+            return ordersDto;
+        }).collect(Collectors.toList());
+
+        ordersDtoPage.setRecords(dtoList);
+        return ordersDtoPage;
+    }
+
+
 }

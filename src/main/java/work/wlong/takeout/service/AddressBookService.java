@@ -1,7 +1,8 @@
-package com.itheima.reggie.service;
+package work.wlong.takeout.service;
+
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.itheima.reggie.entity.AddressBook;
+import work.wlong.takeout.entity.AddressBook;
 
 public interface AddressBookService extends IService<AddressBook> {
 

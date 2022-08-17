@@ -1,4 +1,4 @@
-package com.itheima.reggie.entity;
+package work.wlong.takeout.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

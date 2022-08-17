@@ -1,8 +1,10 @@
-package com.itheima.reggie.dto;
+package work.wlong.takeout.dto;
 
-import com.itheima.reggie.entity.OrderDetail;
-import com.itheima.reggie.entity.Orders;
+
 import lombok.Data;
+import work.wlong.takeout.entity.OrderDetail;
+import work.wlong.takeout.entity.Orders;
+
 import java.util.List;
 
 @Data

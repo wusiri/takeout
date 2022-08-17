@@ -1,8 +1,10 @@
-package com.itheima.reggie.dto;
+package work.wlong.takeout.dto;
 
-import com.itheima.reggie.entity.Setmeal;
-import com.itheima.reggie.entity.SetmealDish;
+
 import lombok.Data;
+import work.wlong.takeout.entity.Setmeal;
+import work.wlong.takeout.entity.SetmealDish;
+
 import java.util.List;
 
 @Data

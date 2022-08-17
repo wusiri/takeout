@@ -1,10 +1,9 @@
-package com.itheima.reggie.service;
+package work.wlong.takeout.service;
+
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.itheima.reggie.entity.Category;
+import work.wlong.takeout.entity.Category;
 
 public interface CategoryService extends IService<Category> {
-
-    public void remove(Long id);
-
+    void remove(Long id);
 }
