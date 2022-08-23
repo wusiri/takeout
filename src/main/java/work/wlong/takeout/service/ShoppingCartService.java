@@ -6,4 +6,5 @@ import work.wlong.takeout.entity.ShoppingCart;
 
 public interface ShoppingCartService extends IService<ShoppingCart> {
 
+    void clean();
 }

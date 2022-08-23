@@ -51,7 +51,6 @@ public class ShoppingCartController {
         }
 
         //查询当前菜品或者套餐是否在购物车中
-        //SQL:select * from shopping_cart where user_id = ? and dish_id/setmeal_id = ?
         ShoppingCart cartServiceOne = shoppingCartService.getOne(queryWrapper);
 
         if(cartServiceOne != null){
@@ -93,13 +92,7 @@ public class ShoppingCartController {
      */
     @DeleteMapping("/clean")
     public R<String> clean(){
-        //SQL:delete from shopping_cart where user_id = ?
-
-        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
-
-        shoppingCartService.remove(queryWrapper);
-
+        shoppingCartService.clean();
         return R.success("清空购物车成功");
     }
 
