@@ -13,6 +13,7 @@ import work.wlong.takeout.utils.ValidateCodeUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.Timer;
 
 @RestController
 @RequestMapping("/user")
@@ -21,6 +22,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    private Long time;
 
     /**
      * 发送手机短信验证码
@@ -41,13 +44,19 @@ public class UserController {
             //SMSUtils.sendMessage("瑞吉外卖","",phone,code);
 
             //需要将生成的验证码保存到Session
+            time = System.currentTimeMillis();
+            log.info("time{}",time);
             session.setAttribute(phone,code);
+
+
 
             return R.success("手机验证码短信发送成功");
         }
 
         return R.error("短信发送失败");
     }
+
+
 
     /**
      * 移动端用户登录
@@ -61,15 +70,19 @@ public class UserController {
 
         //获取手机号
         String phone = map.get("phone").toString();
-
         //获取验证码
-        //String code = map.get("code").toString();
+        String code = map.get("code").toString();
 
         //从Session中获取保存的验证码
         Object codeInSession = session.getAttribute(phone);
+        long millis = System.currentTimeMillis();
+        if(millis-time>60000){
+            return R.error("验证超时");
+        }
+
 
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
-        //if(codeInSession != null && codeInSession.equals(code)){
+        if(codeInSession != null && codeInSession.equals(code)){
             //如果能够比对成功，说明登录成功
 
             LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
@@ -85,8 +98,8 @@ public class UserController {
             }
             session.setAttribute("user",user.getId());
             return R.success(user);
-        //}
-        //return R.error("登录失败");
+        }
+        return R.error("登录失败");
     }
 
     @PostMapping("/loginout")
@@ -97,6 +110,67 @@ public class UserController {
         //返回信息
         return R.success("退出成功");
     }
+
+    @PostMapping("/sendEmail")
+    public R<String> sendEmail(@RequestBody User user, HttpSession session){
+        //获取邮箱
+        String email = user.getEmail();
+        if(StringUtils.isNotEmpty(email)){
+            //生成随机的4位验证码
+            String code = ValidateCodeUtils.generateValidateCode(4).toString();
+            log.info("code={}",code);
+            //需要将生成的验证码保存到Session
+            session.setAttribute(email,code);
+
+            return R.success("邮箱验证发送成功");
+        }
+
+        return R.error("邮箱验证发送失败");
+    }
+
+    /**
+     * 移动端用户登录
+     * @param map
+     * @param session
+     * @return
+     */
+    @PostMapping("/emailLogin")
+    public R<User> loginEmailApi(@RequestBody Map map, HttpSession session){
+        log.info(map.toString());
+
+        //获取邮箱
+        String email = map.get("email").toString();
+
+        //获取验证码
+        String code = map.get("code").toString();
+
+        //从Session中获取保存的验证码
+        java.lang.Object codeInSession = session.getAttribute(email);
+
+
+        //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
+        if(codeInSession != null && codeInSession.equals(code)){
+            //如果能够比对成功，说明登录成功
+
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(User::getPhone,email);
+
+            User user = userService.getOne(queryWrapper);
+            if(user == null){
+                //判断当前手机号对应的用户是否为新用户，如果是新用户就自动完成注册
+                user = new User();
+                user.setPhone(email);
+                user.setStatus(1);
+                userService.save(user);
+            }
+            session.setAttribute("user",user.getId());
+            return R.success(user);
+        }
+        return R.error("登录失败");
+    }
+
+
+
 
 
 

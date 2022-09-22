@@ -33,6 +33,9 @@ public class User implements Serializable {
     //身份证号
     private String idNumber;
 
+    //邮箱
+    private String email;
+
 
     //头像
     private String avatar;

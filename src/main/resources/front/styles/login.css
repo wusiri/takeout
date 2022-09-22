@@ -48,7 +48,12 @@
   color: #ffc200;
   letter-spacing: 0px;
 }
-
+#login .toggle{
+  height: 17px;
+  font-size: 12px;
+  text-align: right;
+  /*margin-right: auto;*/
+}
 #login .divMsg {
   width: 168px;
   height: 17px;
